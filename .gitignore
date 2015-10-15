@@ -1,0 +1,75 @@
+from bs4 import BeautifulSoup
+import urllib2
+import urllib
+import pandas as pd
+import re
+import os
+import time
+from time import gmtime, strftime
+import sys
+import csv
+
+url0=url
+path = r'/home/'
+content0 = urllib.urlopen(url0).read()
+soup0 = BeautifulSoup(content0)
+print (soup0.title)
+os.makedirs(path+state)
+
+##########################################3
+##############################################
+statistics={}
+statistics['1State']=[]
+statistics['2City']=[]
+statistics['3total_records']=[]
+statistics['4removeing_nogeo']=[]
+########################################################################
+columns=['alocation','bcity','cstate','ddate','eLatidute','fLongitude','gVehicles','hDrunkenPersons','iFatalites', 'jPersons','kPedestrians']
+statedata=pd.DataFrame(columns=columns)
+for link in soup0.findAll('a', attrs={'href': re.compile("/accidents/acc-")}):
+    url='http://www.city-data.com'+link['href']
+    city=link.text[48:]
+    exec(open('/home/byandfor/Desktop/datascrapnew.py', "rb").read())
+    statedata=statedata.append(cleandata)
+    statistics['1State'].append(state)
+    statistics['2City'].append(city)
+    statistics['3total_records'].append(citytotal)
+    statistics['4removeing_nogeo'].append(citygeo)
+##################################
+statedata.reset_index()
+statedata=pd.DataFrame(statedata, dtype=str)
+statedata.to_csv('/home/byandfor/Desktop/web_crash/All_data/'+state+'collision.csv', index=False)
+#######################################################################
+
+address={}
+address['1Index']=[i for i in xrange(1, len(statedata)+1)]
+address['2Address']=statedata['alocation']
+address['3City']=statedata['bcity']
+address['4State']=statedata['cstate']
+address=pd.DataFrame(address,dtype=str)
+address.to_csv('/home/byandfor/Desktop/web_crash/All_data_address/'+state+'accident_address.csv', index=False)
+####################################################################
+
+length=len(statedata)
+dic_pt={}
+dic_pt['aReportID']=['' for i in xrange(1,length+1)]
+dic_pt['bUserId']=[2 for i in xrange(length)]
+dic_pt['cReportTypeId']=[2 for i in xrange(length)]# parking ticket 1, accident 2
+dic_pt['dAddedBy']=[2 for i in xrange(length)]
+dic_pt['eHostId']=[2 for i in xrange(length)]
+dic_pt['fLatitude']=statedata['eLatidute']
+dic_pt['gLongitude']=statedata['fLongitude']
+dic_pt['hRdiusOfImpact']=[5 for i in xrange(length)]
+dic_pt['iDescription']=['Fatal Car Crash' for i in xrange(length)]
+dic_pt['jPrice2']=[0 for i in xrange(length)]
+dic_pt['kReportStatusId']=[1 for i in xrange(length)]
+dic_pt['lCreatedTime']=statedata['ddate']
+dic_pt['mLastModifiedTime']=[strftime("%Y-%m-%d %H:%M:%S", time.localtime()) for i in xrange(length)]
+dic_pt['nTotalNumberinjured']=statedata['jPersons']
+dic_pt['okilled']=statedata['iFatalites']
+dic_pt['pVehicletypecode']=['' for i in xrange(length)]
+data=pd.DataFrame(dic_pt,dtype=str)
+data=data[data.fLatitude !='']
+data.to_csv('/home/byandfor/Desktop/web_crash/Data_mapping/'+state+'datamapping.csv', index=False, header=False, dtype=str, quoting=csv.QUOTE_ALL)
+statistics=pd.DataFrame(statistics, dtype=str)
+statistics.to_csv('', index=False)
